@@ -1,4 +1,3 @@
--- Fly sistemi değişkenleri
 local player = game.Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
 local hrp = char:WaitForChild("HumanoidRootPart")
@@ -7,14 +6,11 @@ local flying = false
 local speed = 50  -- başlangıç hızı
 local bodyVel
 local bodyGyro
-
--- GUI öğeleri
 local gui = script.Parent
 local flyButton = gui:WaitForChild("FlyButton")
 local spUp = gui:WaitForChild("SpeedUp")
 local spDown = gui:WaitForChild("SpeedDown")
 
--- Fly aç/kapa
 local function toggleFly()
     flying = not flying
     
@@ -30,9 +26,7 @@ local function toggleFly()
         bodyGyro.P = 5000
         bodyGyro.Parent = hrp
         
-        flyButton.Text = "Fly: ON"
-        
-        -- Hareket döngüsü
+        flyButton.Text = "Fly: ON
         spawn(function()
             while flying do
                 local move = Vector3.zero
@@ -62,7 +56,6 @@ local function toggleFly()
         end)
         
     else
-        -- Uçmayı kapat
         if bodyVel then bodyVel:Destroy() end
         if bodyGyro then bodyGyro:Destroy() end
         flyButton.Text = "Fly: OFF"
@@ -80,8 +73,6 @@ local function decSpeed()
     speed = math.max(0, speed - 10)
     print("Fly Speed:", speed)
 end
-
--- Buton bağlantıları
 flyButton.MouseButton1Click:Connect(toggleFly)
 spUp.MouseButton1Click:Connect(incSpeed)
 spDown.MouseButton1Click:Connect(decSpeed)
