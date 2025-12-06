@@ -1,78 +1,27 @@
 local player = game.Players.LocalPlayer
-local char = player.Character or player.CharacterAdded:Wait()
-local hrp = char:WaitForChild("HumanoidRootPart")
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local flyActive = false
+local speed = 50
 
-local flying = false
-local speed = 50  -- başlangıç hızı
-local bodyVel
-local bodyGyro
-local gui = script.Parent
-local flyButton = gui:WaitForChild("FlyButton")
-local spUp = gui:WaitForChild("SpeedUp")
-local spDown = gui:WaitForChild("SpeedDown")
+local button = player:WaitForChild("PlayerGui"):WaitForChild("FlyUI"):WaitForChild("ToggleFlyButton")
 
-local function toggleFly()
-    flying = not flying
-    
-    if flying then
-        -- Uçmayı başlat
-        bodyVel = Instance.new("BodyVelocity")
-        bodyVel.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-        bodyVel.Velocity = Vector3.zero
-        bodyVel.Parent = hrp
-        
-        bodyGyro = Instance.new("BodyGyro")
-        bodyGyro.MaxTorque = Vector3.new(1e5, 1e5, 1e5)
-        bodyGyro.P = 5000
-        bodyGyro.Parent = hrp
-        
-        flyButton.Text = "Fly: ON
-        spawn(function()
-            while flying do
-                local move = Vector3.zero
-                local cam = workspace.CurrentCamera
-                
-                -- WASD kontrol
-                local uis = game:GetService("UserInputService")
-                
-                if uis:IsKeyDown(Enum.KeyCode.W) then
-                    move = move + cam.CFrame.LookVector
-                end
-                if uis:IsKeyDown(Enum.KeyCode.S) then
-                    move = move - cam.CFrame.LookVector
-                end
-                if uis:IsKeyDown(Enum.KeyCode.A) then
-                    move = move - cam.CFrame.RightVector
-                end
-                if uis:IsKeyDown(Enum.KeyCode.D) then
-                    move = move + cam.CFrame.RightVector
-                end
-                
-                bodyVel.Velocity = move * speed
-                bodyGyro.CFrame = cam.CFrame
-
-                task.wait()
-            end
-        end)
-        
+button.MouseButton1Click:Connect(function()
+    flyActive = not flyActive
+    if flyActive then
+        button.Text = "Fly: Açık"
     else
-        if bodyVel then bodyVel:Destroy() end
-        if bodyGyro then bodyGyro:Destroy() end
-        flyButton.Text = "Fly: OFF"
+        button.Text = "Fly: Kapalı"
+        humanoid:ChangeState(Enum.HumanoidStateType.Running)
     end
-end
+end)
 
--- Hız artır
-local function incSpeed()
-    speed = speed + 10
-    print("Fly Speed:", speed)
-end
-
--- Hız azalt
-local function decSpeed()
-    speed = math.max(0, speed - 10)
-    print("Fly Speed:", speed)
-end
-flyButton.MouseButton1Click:Connect(toggleFly)
-spUp.MouseButton1Click:Connect(incSpeed)
-spDown.MouseButton1Click:Connect(decSpeed)
+game:GetService("RunService").RenderStepped:Connect(function()
+    if flyActive and character then
+        humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+        local hrp = character:WaitForChild("HumanoidRootPart")
+        local move = humanoid.MoveDirection
+        local input = move * speed
+        hrp.Velocity = Vector3.new(input.X, speed, input.Z)
+    end
+end)
